@@ -33,7 +33,7 @@ public static class CatalogSender
     public static async Task<List<Message>> SendAllProductsInCategoryAsync(User user, int categoryId)
     {
         var sentMessages = new List<Message>();
-        foreach (var product in AllProductsInCategory.GetProductsInCategory(categoryId))
+        foreach (var product in await AllProductsInCategory.GetProductsInCategoryAsync(categoryId))
         {
             InlineKeyboardMarkup keyboardMarkup = new(new[]
             {
@@ -51,12 +51,13 @@ public static class CatalogSender
         return sentMessages;
     }
 
-    public static void DeleteMessagesWithProductAnotherCategory(User user, List<Message> messages)
+    public static Task DeleteMessagesWithProductAnotherCategory(User user, List<Message> messages)
     {
         async void Action(Message message) => 
             await Sender.botClient.DeleteMessageAsync(chatId: user.ChatId,
                 messageId: message.MessageId, 
                 cancellationToken: cancellationToken);
         messages.ForEach(Action);
+        return Task.CompletedTask;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DvdBarBot;
+using DvdBarBot.Admin;
 using DvdBarBot.DataBase;
 using DvdBarBot.Interfaces;
 using DvdBarBot.Sender;
@@ -15,7 +16,7 @@ using var cts = new CancellationTokenSource();
 Handlers.Users = new Dictionary<long, User>();
 var dataBase = new DataBase();
 IDbContext dbContext = dataBase;
-/*dataBase.FillDb();*/
+dataBase.FillDb();
 Sender.dbContext = dbContext.dbContext;
 // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
 var receiverOptions = new ReceiverOptions
@@ -41,6 +42,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 {
     Handlers.botClient = botClient;
     Handlers.cancellationToken = cancellationToken;
+    Handlers.AddUser = Sender.dbContext;
     await Handlers.HandleUpdateAsync(update);
     
 }

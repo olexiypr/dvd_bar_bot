@@ -11,7 +11,7 @@ public class DataBase : IDbContext
         dbContext = new ApplicationDbContext();
     }
     public ApplicationDbContext dbContext { get; set; }
-    
+
     public void FillDb()
     {
         dbContext.Database.EnsureDeleted();
@@ -23,6 +23,7 @@ public class DataBase : IDbContext
         var efl1500PinkLemonade = new Product("Ельф бар 1500", 280, "Pink lemonade", 5, elf1500);
         var efl2000PinkLemonade = new Product("Ельф бар 2000", 340, "Pink lemonade", 4,elf2000);
         var efl5000PinkLemonade = new Product("Ельф бар 5000", 500, "Pink lemonade", 6, elf5000);
+
         
         elf1500.AddProduct(efl1500PinkLemonade);
         elf2000.AddProduct(efl2000PinkLemonade);
@@ -35,7 +36,7 @@ public class DataBase : IDbContext
         dbContext.products.Add(efl1500PinkLemonade);
         dbContext.products.Add(efl2000PinkLemonade);
         dbContext.products.Add(efl5000PinkLemonade);
-
+        
         dbContext.SaveChanges();
     }
 }

@@ -21,7 +21,7 @@ public class CatalogState : State
         var categoryId = int.Parse(callbackQuery.Data?.Split("_")[1]);
         if (SentMessages != null)
         {
-            DeleteMessagesWithProductAnotherCategory(user, SentMessages);
+            await DeleteMessagesWithProductAnotherCategory(user, SentMessages);
         }
         SentMessages = await SendAllProductsInCategoryAsync(user, categoryId);
     }

@@ -2,7 +2,7 @@
 
 namespace DvdBarBot.Interfaces;
 
-public interface IAddUser
+public interface IGetRaffle
 {
-    Task AddUserAsync(User user);
+    Task<Raffle> GetRaffleAsync();
 }

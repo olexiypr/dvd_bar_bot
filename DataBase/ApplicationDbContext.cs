@@ -1,4 +1,6 @@
-﻿using DvdBarBot.Entities;
+﻿using System.Data.Entity.Infrastructure;
+using System.Linq;
+using DvdBarBot.Entities;
 using DvdBarBot.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -6,14 +8,24 @@ using Microsoft.Extensions.Logging;
 
 namespace DvdBarBot.DataBase;
 
-public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAllCategories, IAddUser
+public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAllCategories, IAddUser, IGetRaffle
 {
     public DbSet<ProductCategory> productCategories { get; set; }
     public DbSet<Product> products { get; set; }
     
     public DbSet<User> users { get; set; }
-    
+    public DbSet<Raffle> raffle{ get; set; }
+    public DbSet<Promocode> promocodes { get; set; }
+
     public IEnumerable<ProductCategory> ProductCategories => productCategories;
+    public async Task<Raffle> GetRaffleAsync ()
+    {
+        if (raffle.CountAsync().Result != 0)
+        {
+            return await raffle.FirstAsync();
+        }
+        return null;
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -51,21 +63,61 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
         modelBuilder.Entity<User>()
             .ToTable("users")
             .HasKey(user => user.Id);
+
+        modelBuilder.Entity<User>()
+            .HasOne(user => user.Raffle);
+        
+        modelBuilder.Entity<User>()
+            .Ignore(user => user.Timer);
+        
+        modelBuilder.Entity<User>()
+            .Ignore(user => user.State);
+        
+        modelBuilder.Entity<User>()
+            .Ignore(user => user.TelegramUser);
+        
+        modelBuilder.Entity<Raffle>()
+            .Ignore(raffle => raffle.Winner);
+        
+        modelBuilder.Entity<Raffle>()
+            .Ignore(raffle => raffle.Start);
+        
+        modelBuilder.Entity<Raffle>()
+            .Ignore(raffle => raffle.End);
+        
+        modelBuilder.Entity<Raffle>()
+            .Ignore(raffle => raffle.IsStarted);
+        
+        modelBuilder.Entity<Raffle>()
+            .Property(raffle => raffle.CurrentUserCount)
+            .HasColumnName("current_user_count");
+        
+
+        modelBuilder.Entity<Promocode>()
+            .HasKey(promocode => promocode.Id);
     }
 
-    public IEnumerable<Product> GetProductsInCategory(ProductCategory category)
+    public async Task<IEnumerable<Product>> GetProductsInCategoryAsync(ProductCategory category)
     {
-        return products.Where(product => product.Category == category);
+        Task<IEnumerable<Product>> Get(IEnumerable<Product> products)
+        {
+            return Task.FromResult(products.Where(product => product.Category == category));
+        }
+        return await Get(products);
     }
 
-    public IEnumerable<Product> GetProductsInCategory(int categoryId)
+    public async Task<IEnumerable<Product>> GetProductsInCategoryAsync(int categoryId)
     {
-        return products.Where(product => product.Category.Id == categoryId);
+        Task<IEnumerable<Product>> Get(IEnumerable<Product> products)
+        {
+            return Task.FromResult(products.Where(product => product.Category.Id == categoryId));
+        }
+        return await Get(products);
     }
 
-    public async Task Add(User user)
+    public async Task AddUserAsync(User user)
     {
-        if (users.Count(use => use.ChatId == user.ChatId)==0)
+        if (!users.Any(use => use.ChatId == user.ChatId))
         {
             users.Add(user);
         }

@@ -4,6 +4,6 @@ namespace DvdBarBot.Interfaces;
 
 public interface IGetAllProductsInCategory
 {
-    IEnumerable<Product> GetProductsInCategory(ProductCategory category);
-    IEnumerable<Product> GetProductsInCategory(int categoryId);
+    Task<IEnumerable<Product>> GetProductsInCategoryAsync(ProductCategory category);
+    Task<IEnumerable<Product>> GetProductsInCategoryAsync(int categoryId);
 }

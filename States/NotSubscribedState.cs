@@ -16,7 +16,7 @@ public class NotSubscribedState : State
 
     private async Task PropositionSubscribe(User user)
     {
-        await PropositionSubscribeChannelAsync(user);
+        await SendPropositionSubscribeChannelAsync(user);
     }
     public override void ChangeState(User user, Update update)
     {
