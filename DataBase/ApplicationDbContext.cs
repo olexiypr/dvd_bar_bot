@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DvdBarBot.DataBase;
 
-public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAllCategories, IAddUser, IGetRaffle
+public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAllCategories, IAddUser, IGetRaffle, IGetAllProducts
 {
     public DbSet<ProductCategory> productCategories { get; set; }
     public DbSet<Product> products { get; set; }
@@ -26,14 +26,18 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
         }
         return null;
     }
-
+    public async Task<IEnumerable<Product>> GetAllProductsAsync()
+    {
+        return await products.ToListAsync();
+    }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var config = new ConfigurationBuilder()
             .AddUserSecrets<ApplicationDbContext>()
             .Build();
         var connectionStrings = config.GetConnectionString("DvdBarDb");
-        optionsBuilder.UseNpgsql(connectionStrings)
+        var connectionStringUbuntu  = "Host=localhost;Username=aloshaprokopenko5;Password=787898;Database=dvd_bar";
+        optionsBuilder.UseNpgsql(connectionStringUbuntu)
             .EnableDetailedErrors()
             .EnableSensitiveDataLogging()
             .LogTo(

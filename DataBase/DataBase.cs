@@ -20,9 +20,9 @@ public class DataBase : IDbContext
         var elf2000 = new ProductCategory("Ельф бар 2000");
         var elf5000 = new ProductCategory("Ельф бар 5000");
 
-        var efl1500PinkLemonade = new Product("Ельф бар 1500", 280, "Pink lemonade", 5, elf1500);
-        var efl2000PinkLemonade = new Product("Ельф бар 2000", 340, "Pink lemonade", 4,elf2000);
-        var efl5000PinkLemonade = new Product("Ельф бар 5000", 500, "Pink lemonade", 6, elf5000);
+        var efl1500PinkLemonade = new Product("Ельф бар 1500", 280, "Pink lemonade", elf1500);
+        var efl2000PinkLemonade = new Product("Ельф бар 2000", 340, "Pink lemonade",elf2000);
+        var efl5000PinkLemonade = new Product("Ельф бар 5000", 500, "Pink lemonade", elf5000);
 
         
         elf1500.AddProduct(efl1500PinkLemonade);

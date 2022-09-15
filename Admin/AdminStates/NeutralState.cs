@@ -24,6 +24,7 @@ public class NeutralState : AdminState
         {
             case "Додати товар":
             {
+                admin.State = new AppProductState(admin);
                 return;
             }
             case "Додати категорію":
@@ -32,6 +33,7 @@ public class NeutralState : AdminState
             }
             case "Видалити товар":
             {
+                admin.State = new RemoveProductState(admin);
                 return;
             }
             case "Видалити категорію":

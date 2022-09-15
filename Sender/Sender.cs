@@ -1,5 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Net.Mime;
+using DvdBarBot.Admin;
 using DvdBarBot.DataBase;
 using DvdBarBot.Entities;
 using DvdBarBot.Interfaces;
@@ -23,6 +24,7 @@ public static class Sender
         {
             _dbContext = value;
             GetRaffle = value;
+            AdminSender.GetAllProducts = value;
         }
     }
 

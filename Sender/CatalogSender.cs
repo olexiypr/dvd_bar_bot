@@ -39,11 +39,8 @@ public static class CatalogSender
             {
                 InlineKeyboardButton.WithUrl("Зв'язатися з менеджером @olexiypr для покупки", "https://t.me/olexiypr"),
             });
-            var text = $"{product.Description}\n" +
-                            $"Ціна: {product.Price}\n" +
-                            $"В наявності: {product.CountInStock}";
             sentMessages.Add(await Sender.botClient.SendTextMessageAsync(chatId: user.ChatId,
-                text: text,
+                text: product.GetMessageString(),
                 replyMarkup: keyboardMarkup,
                 cancellationToken: cancellationToken));
         }
