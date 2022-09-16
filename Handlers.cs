@@ -136,9 +136,8 @@ public static class Handlers
         }
         var chatId = message.Chat.Id;
         await using var context = new ApplicationDbContext();
-        var usersId = context.users.Select(u =>  u.Id).ToList();
-        await context.DisposeAsync();
-        if (Users.Count == 0 || !Users.ContainsKey(chatId) && !usersId.Contains(Users[chatId].Id))
+        var usersId = context.users.Select(u =>  u.ChatId).ToList();
+        if (Users.Count == 0 || !Users.ContainsKey(chatId) && !usersId.Contains(chatId))
         {
             Users.Add(message.Chat.Id, new User(message.Chat.Id, message.From));
             try

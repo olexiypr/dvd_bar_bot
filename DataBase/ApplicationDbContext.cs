@@ -43,7 +43,7 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
             .EnableDetailedErrors()
             .EnableSensitiveDataLogging()
             .LogTo(
-                new StreamWriter("efCoreLogs.log", false).WriteLine,
+                new StreamWriter("efCoreLogs.log", true).WriteLine,
                 new[] {DbLoggerCategory.Database.Command.Name},
                 LogLevel.Information);
 #elif DEBUG
