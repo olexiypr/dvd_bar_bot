@@ -1,5 +1,5 @@
 ﻿
-#define DEBUG
+#define RELEASE
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using DvdBarBot.Entities;
@@ -43,7 +43,7 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
             .EnableDetailedErrors()
             .EnableSensitiveDataLogging()
             .LogTo(
-                new StreamWriter("efCoreLogs.log", true).WriteLine,
+                new StreamWriter("efCoreLogs.log", false).WriteLine,
                 new[] {DbLoggerCategory.Database.Command.Name},
                 LogLevel.Information);
 #elif DEBUG
@@ -81,9 +81,11 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
         modelBuilder.Entity<User>()
             .HasOne(user => user.Raffle);
         
-        
         modelBuilder.Entity<User>()
             .Ignore(user => user.State);
+        
+        modelBuilder.Entity<User>()
+            .Ignore(user => user.SentMessage);
         
         modelBuilder.Entity<User>()
             .Ignore(user => user.TelegramUser);

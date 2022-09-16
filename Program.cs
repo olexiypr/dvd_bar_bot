@@ -18,7 +18,7 @@ using var cts = new CancellationTokenSource();
 Handlers.Users = new Dictionary<long, User>();
 var dataBase = new DataBase();
 IDbContext dbContext = dataBase;
-dataBase.FillDb();
+/*dataBase.FillDb();*/
 Sender.dbContext = dbContext.dbContext;
 var logger = new LoggerConfiguration()
     .MinimumLevel.Override("Telegram", LogEventLevel.Error)
