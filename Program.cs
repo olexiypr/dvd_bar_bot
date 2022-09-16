@@ -13,7 +13,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using User = DvdBarBot.Entities.User;
 
-var botClient = new TelegramBotClient(Token.GetToken);
+var botClient = new TelegramBotClient("5484197879:AAEGt06l1umLmC6C6XfGwRvX718Yg_bHjlw");
 using var cts = new CancellationTokenSource();
 Handlers.Users = new Dictionary<long, User>();
 var dataBase = new DataBase();
