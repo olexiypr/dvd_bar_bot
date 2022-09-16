@@ -29,13 +29,13 @@ public class DataBase : IDbContext
         elf2000.AddProduct(efl2000PinkLemonade);
         elf2000.AddProduct(efl5000PinkLemonade);
 
-        dbContext.productCategories.Add(elf1500);
-        dbContext.productCategories.Add(elf2000);
-        dbContext.productCategories.Add(elf5000);
+        dbContext.Add(elf1500);
+        dbContext.Add(elf2000);
+        dbContext.Add(elf5000);
 
-        dbContext.products.Add(efl1500PinkLemonade);
-        dbContext.products.Add(efl2000PinkLemonade);
-        dbContext.products.Add(efl5000PinkLemonade);
+        dbContext.Add(efl1500PinkLemonade);
+        dbContext.Add(efl2000PinkLemonade);
+        dbContext.Add(efl5000PinkLemonade);
         
         dbContext.SaveChanges();
     }

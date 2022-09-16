@@ -8,12 +8,23 @@ namespace DvdBarBot.States;
 public class SubscribedState : State
 {
     public delegate Task OnCreating (User user);
+    
+
     public SubscribedState(User user)
     {
         OnCreating onCreating = Creating;
         onCreating.Invoke(user);
     }
-    private async Task Creating(User user)
+    
+    public SubscribedState(User user, bool isNeedInvokeCreating)
+    {
+        if (isNeedInvokeCreating)
+        {
+            OnCreating onCreating = Creating;
+            onCreating.Invoke(user);
+        }
+    }
+    public async Task Creating(User user)
     {
         await SayHalloAsync(user);
         await SendMenuAsync(user);
@@ -21,6 +32,20 @@ public class SubscribedState : State
     
     public override async void ChangeState(User user, Update update)
     {
+        if (update.CallbackQuery is { } callbackQuery)
+        {
+            int count = 0;
+            if (callbackQuery.Data.StartsWith("take_part_raffle"))
+            {
+                count++;
+                if (count == 5)
+                {
+                    count = 0;
+                    await Sender.Sender.SendInfoForAlreadyParticipatingRaffleAsync(user);
+                }
+            }
+            return;
+        }
         if (update.Message is not {Text: { } messageText})
             return;
         switch (messageText)

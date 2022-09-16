@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Data.Entity;
+using System.Text;
 using DvdBarBot.DataBase;
 using DvdBarBot.Entities;
 using DvdBarBot.Interfaces;
@@ -147,6 +148,15 @@ public static class AdminSender
     {
         await botClient.SendTextMessageAsync(chatId: Admin.ChatId,
             text: "Зміни збережено!✅",
+            cancellationToken: cancellationToken);
+    }
+
+    public static async Task SendCountUsersAsync()
+    {
+        await using var dbContext = new ApplicationDbContext();
+        var count = dbContext.users.Count();
+        await botClient.SendTextMessageAsync(chatId: Admin.ChatId,
+            text: $"Загальна кількість користувачів: {count}",
             cancellationToken: cancellationToken);
     }
 }

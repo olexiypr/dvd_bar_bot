@@ -65,7 +65,7 @@ public static class Sender
         var raffle = Raffle.Instance;
         InlineKeyboardMarkup keyboardMarkup = new(new[]
         {
-            new[] {InlineKeyboardButton.WithCallbackData($"Беру участь\nКількість учасників {raffle.CurrentUserCount}/{raffle.MaxUsersCount}", "take_part_raffle"),}
+            new[] {InlineKeyboardButton.WithCallbackData($"Беру участь. Кількість учасників {raffle.CurrentUserCount}/{raffle.MaxUsersCount}", "take_part_raffle"),}
         });
         return await botClient.SendTextMessageAsync(chatId: user.ChatId,
             text: $"Привіт, {user.Name} тобі випала можливість прийняти участь в розіграші" +
@@ -74,8 +74,23 @@ public static class Sender
             replyMarkup: keyboardMarkup);
     }
 
-    public static async Task SendSubmitToTakePartInRaffle(User user)
+    public static async Task SendSubmitToTakePartInRaffle(User user, Message message)
     {
-        
+        InlineKeyboardMarkup keyboardMarkup = new(new[]
+        {
+            new[] {InlineKeyboardButton.WithCallbackData($"Приймаєш участь!✅", "take_part_raffle"),}
+        });
+        await botClient.EditMessageTextAsync(chatId: user.ChatId,
+            messageId: message.MessageId,
+            cancellationToken: cancellationToken,
+            replyMarkup: keyboardMarkup,
+            text: message.Text);
+    }
+
+    public static async Task SendInfoForAlreadyParticipatingRaffleAsync(User user)
+    {
+        await botClient.SendTextMessageAsync(chatId: user.ChatId,
+            cancellationToken: cancellationToken,
+            text: "Ви вже приймаєте участь в розіграші");
     }
 }

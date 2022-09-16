@@ -36,8 +36,7 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
             .AddUserSecrets<ApplicationDbContext>()
             .Build();
         var connectionStrings = config.GetConnectionString("DvdBarDb");
-        var connectionStringUbuntu  = "Host=localhost;Username=aloshaprokopenko5;Password=787898;Database=dvd_bar";
-        optionsBuilder.UseNpgsql(connectionStringUbuntu)
+        optionsBuilder.UseNpgsql(ConnectionStrings.connectionStringAzure)
             .EnableDetailedErrors()
             .EnableSensitiveDataLogging()
             .LogTo(
@@ -96,7 +95,6 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
             .Property(raffle => raffle.CurrentUserCount)
             .HasColumnName("current_user_count");
         
-
         modelBuilder.Entity<Promocode>()
             .HasKey(promocode => promocode.Id);
     }
@@ -121,7 +119,7 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
 
     public async Task AddUserAsync(User user)
     {
-        if (!users.Any(use => use.ChatId == user.ChatId))
+        if (!await users.AnyAsync(use => use.ChatId == user.ChatId))
         {
             users.Add(user);
         }

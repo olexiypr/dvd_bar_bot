@@ -17,7 +17,7 @@ public class NeutralState : AdminState
     {
         await AdminSender.SendMenuAsync();
     }
-    public override void ChangeState(Admin admin, Update update)
+    public override async void ChangeState(Admin admin, Update update)
     {
         var message = update.Message.Text;
         switch (message)
@@ -43,6 +43,11 @@ public class NeutralState : AdminState
             case "Почати роіграш":
             {
                 admin.State = new RaffleState(admin);
+                return;
+            }
+            case "Кількість користувачів":
+            {
+                await AdminSender.SendCountUsersAsync();
                 return;
             }
         }

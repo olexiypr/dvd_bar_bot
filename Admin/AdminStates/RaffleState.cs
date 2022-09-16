@@ -12,11 +12,11 @@ public class RaffleState : AdminState
     private delegate Task onCreating(Admin admin);
     public RaffleState(Admin admin)
     {
-        onCreating creating = onCreate;
+        onCreating creating = OnCreate;
         creating.Invoke(admin);
     }
 
-    private async Task onCreate(Admin admin)
+    private async Task OnCreate(Admin admin)
     {
         var promocode = new Promocode(10);
         admin.Raffle = Raffle.CreateNewInstance(promocode, 30);

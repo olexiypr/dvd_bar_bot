@@ -1,4 +1,7 @@
-﻿using DvdBarBot.Interfaces;
+﻿using System.Data.Entity;
+using DvdBarBot.DataBase;
+using DvdBarBot.Entities;
+using DvdBarBot.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -13,8 +16,22 @@ public static class CatalogSender
     public static readonly IGetAllCategories AllCategories = Sender.dbContext;
     public static async Task SendCategoriesAsync(User user)
     {
-        foreach (var category in AllCategories.ProductCategories)
+        await using var dbContext = new ApplicationDbContext();
+        /*var categories = dbContext.products
+            .Join(dbContext.productCategories, 
+                product => product.Category.Id, 
+                category => category.Id, 
+                (product, category) => new {ProductCategory = category, Product = product})
+            .ToList()
+            .Select(obj => obj.ProductCategory);*/
+        var categories = dbContext.productCategories.Include(category => category.Products).ToList();
+        foreach (var category in categories)
         {
+            await dbContext.Entry(category).Collection(c => c.Products).LoadAsync();
+            if (!category.Products.Any())
+            {
+                continue;
+            }
             InlineKeyboardMarkup keyboardMarkup = new(new[]
             {
                 new[]

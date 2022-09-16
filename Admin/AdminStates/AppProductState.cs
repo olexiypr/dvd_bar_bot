@@ -26,6 +26,11 @@ public class AppProductState : AdminState
     {
         if (update.Message is { } message)
         {
+            if (message.Text == "/exit")
+            {
+                admin.State = new NeutralState(admin);
+                return;
+            }
             await HandleTextMessage(message);
         }
         else if (update.CallbackQuery is { } callbackQuery)
@@ -37,16 +42,16 @@ public class AppProductState : AdminState
     private async Task HandleTextMessage(Message message)
     {
         await using var dbContext = new ApplicationDbContext();
-        var messageTest = message.Text;
+        var messageText = message.Text;
         var walidThreeLines = new Regex(@"\n\w+");
-        if (walidThreeLines.Matches(messageTest).Count != 2)
+        if (walidThreeLines.Matches(messageText).Count != 2)
         {
             await AdminSender.SendInvalidDataWarning();
             return;
         }
-        var productName = messageTest.Split("\n")[0];
-        var productPrice = messageTest.Split("\n")[1];
-        var productDescription = messageTest.Split("\n")[2];
+        var productName = messageText.Split("\n")[0];
+        var productPrice = messageText.Split("\n")[1];
+        var productDescription = messageText.Split("\n")[2];
         Product = new Product(productName, decimal.Parse(productPrice), productDescription);
         FinalProductMessage = await AdminSender.SendAddedProductInfoAsync(Product);
     }

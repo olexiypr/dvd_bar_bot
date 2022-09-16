@@ -1,4 +1,5 @@
 ﻿using DvdBarBot.DataBase;
+using DvdBarBot.Entities;
 using Telegram.Bot.Types;
 using User = DvdBarBot.Entities.User;
 
@@ -30,19 +31,20 @@ public class PropositionRaffleState : State
         if (callbackQuery.Data.StartsWith("take_part_raffle"))
         {
             await using  var dbContext = new ApplicationDbContext();
-            var raffle = dbContext.raffle.First();
+            var raffle = Raffle.Instance;
             try
             {
                 raffle.AddUser(user);
-                user.Raffle = raffle;
+                dbContext.Update(raffle);
                 await dbContext.SaveChangesAsync();
+                await Sender.Sender.SendSubmitToTakePartInRaffle(user, sentMessage);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 throw;
             }
-            user.State = new SubscribedState(user);
+            user.State = new SubscribedState(user, false);
         }
     }
 }
