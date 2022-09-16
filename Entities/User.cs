@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 using System.Timers;
 using DvdBarBot.States;
 using Telegram.Bot;
@@ -20,9 +21,8 @@ public class User
     public bool IsSubscriber => Handlers.IsSubscriberAsync(this).Result;
     public Telegram.Bot.Types.User? TelegramUser { get; set; }
     public string Name { get; set; }
-    [NotMapped]
-    public Timer Timer { get; set; }
     public Raffle? Raffle { get; set; }
+    public Message? SentMessage { get; set; }
 
     public User()
     {
@@ -37,34 +37,14 @@ public class User
         TelegramUser = user;
         Name = user.FirstName + " " + user.LastName;
         State = new NeutralState();
-        const long msSecInHour = 1000 * 60 * 60;
-        var random = new Random();
-        /*Timer = new Timer(msSecInHour * random.Next(12,15));
-        Timer.Elapsed += OnTimerEvent;
-        Timer.Enabled = true;*/
     }
     public void ProcessUpdate(Update update)
     {
         State.ChangeState(this, update);
     }
 
-    private async void OnTimerEvent(Object source, ElapsedEventArgs eventArgs)
+    public string GetInfo()
     {
-        const long msSecInHour = 1000 * 60 * 60;
-        if (DateTime.Now.Hour > 23 && DateTime.Now.Hour < 10)
-        {
-            Timer.Stop();
-            Timer.Dispose();
-        }
-        else
-        {
-            Timer = new Timer(msSecInHour * 4);
-            Timer.Elapsed += OnTimerEvent;
-            Timer.Enabled = true;
-        }
-        if (DateTime.Now.Hour < 23 && DateTime.Now.Hour > 10)
-        {
-            
-        }
+        return $"Id: {Id}| user id: {UserId}| chat id: {ChatId}| state = {State}";
     }
 }

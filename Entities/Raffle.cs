@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Timers;
+using Telegram.Bot;
 using Timer = System.Timers.Timer;
 
 namespace DvdBarBot.Entities;
@@ -56,17 +57,20 @@ public class Raffle
     {
         IsStarted = true;
         Start = DateTime.Now;
-        double countMiliCesInDay = 1000 * 3600 * 24;
+        double countMiliCesInDay = 1000 * 3600 * 8;
         Timer = new Timer(countMiliCesInDay);
         Timer.Elapsed += GetWinner;
         End = DateTime.Now.AddDays(1);
     }
 
-    public void GetWinner(Object timer, ElapsedEventArgs  e)
+    public async void GetWinner(Object timer, ElapsedEventArgs  e)
     {
         Timer.Dispose();
         Timer.Stop();
         Winner = Users[new Random().Next(MaxUsersCount)];
+        await Sender.Sender.botClient.SendTextMessageAsync(chatId: Winner.ChatId,
+            text: "U are winner!",
+            cancellationToken: Sender.Sender.cancellationToken);
     }
 
     public void AddUser(User user)

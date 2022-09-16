@@ -2,3 +2,4 @@
 /obj
 Token.cs
 DataBase/DataBase.cs
+ConnectionStrings.cs

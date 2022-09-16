@@ -17,13 +17,6 @@ public static class CatalogSender
     public static async Task SendCategoriesAsync(User user)
     {
         await using var dbContext = new ApplicationDbContext();
-        /*var categories = dbContext.products
-            .Join(dbContext.productCategories, 
-                product => product.Category.Id, 
-                category => category.Id, 
-                (product, category) => new {ProductCategory = category, Product = product})
-            .ToList()
-            .Select(obj => obj.ProductCategory);*/
         var categories = dbContext.productCategories.Include(category => category.Products).ToList();
         foreach (var category in categories)
         {

@@ -1,5 +1,9 @@
-﻿using DvdBarBot.Interfaces;
+﻿using DvdBarBot.DataBase;
+using DvdBarBot.Interfaces;
 using DvdBarBot.States;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 using Telegram.Bot;
 using static DvdBarBot.Handlers;
 using Telegram.Bot.Types;
@@ -11,6 +15,17 @@ public static class Handlers
 {
     private static ITelegramBotClient _botClient;
 
+    public static Logger InfoDbLogger = new LoggerConfiguration()
+        .MinimumLevel
+        .Override("Microsoft", LogEventLevel.Information)
+        .WriteTo.File("accessToDbLogs.log", rollingInterval: RollingInterval.Day)
+        .CreateLogger();
+    
+    public static Logger ErrorsDbLogger = new LoggerConfiguration()
+        .MinimumLevel
+        .Override("Microsoft", LogEventLevel.Error)
+        .WriteTo.File("dbErrorsLogs.log", rollingInterval: RollingInterval.Infinite)
+        .CreateLogger();
     private static CancellationToken _cancellationToken;
     public static ITelegramBotClient botClient
     {
@@ -33,9 +48,12 @@ public static class Handlers
     }
 
     public static IAddUser AddUser { get; set; }
-
     public static Dictionary<long, User> Users { get; set; }
-    public static Admin.Admin Admin { get; set; }
+    public static Admin.Admin? Admin { get; set; }
+    /// <summary>
+    /// Method for handle update from user
+    /// </summary>
+    /// <param name="update">Update (message or callback query)</param>
     public static async Task HandleUpdateAsync(Update update)
     {
         if (update.Message is not { } && update.CallbackQuery is not { })
@@ -45,7 +63,7 @@ public static class Handlers
         var chatId = update.Message == null ? update.CallbackQuery.Message.Chat.Id : update.Message.Chat.Id;
         if (chatId == DvdBarBot.Admin.Admin.ChatId)
         {
-            await HandleAdminUpdateAsync(update);
+            HandleAdminUpdateAsync(update);
             return;
         }
         switch (update.Type)
@@ -71,11 +89,13 @@ public static class Handlers
         {
             Users.Add(message.Chat.Id, new User(message.Chat.Id, message.From));
         }
-        
         Users[chatId].ProcessUpdate(update);
     }
-
-    private static async Task HandleAdminUpdateAsync(Update update)
+    /// <summary>
+    /// Method for handle update from admin
+    /// </summary>
+    /// <param name="update">Update (message or callbackQuery)</param>
+    private static void HandleAdminUpdateAsync(Update update)
     {
         if (Admin == null)
         {
@@ -104,6 +124,10 @@ public static class Handlers
             Users.Add(message.Chat.Id, new User(message.Chat.Id, await IsSubscriberAsync(message), message.From));
         }*/
     }
+    /// <summary>
+    /// Method for handling users messages and add user to database (if this is new user)
+    /// </summary>
+    /// <param name="message"></param>
     public static async Task HandleMessageAsync(Message message)
     {
         if (message.Text == "/restart")
@@ -111,12 +135,31 @@ public static class Handlers
             Users[message.Chat.Id] = new User(message.Chat.Id, message.From);
         }
         var chatId = message.Chat.Id;
-        if (!Users.ContainsKey(chatId))
+        await using var context = new ApplicationDbContext();
+        var usersId = context.users.Select(u =>  u.Id);
+        await context.DisposeAsync();
+        if (!Users.ContainsKey(chatId) && !usersId.Contains(Users[chatId].Id))
         {
             Users.Add(message.Chat.Id, new User(message.Chat.Id, message.From));
-            await AddUser.AddUserAsync(Users[chatId]);
+            try
+            {
+                await AddUser.AddUserAsync(Users[chatId]);
+                InfoDbLogger.Information($"HandleMessageAsync\n{Users[chatId].GetInfo()}");
+            }
+            catch (Exception e)
+            {
+                ErrorsDbLogger.Error($"HandleMessageAsync\n{Users[chatId].GetInfo()}\n{e.Message}");
+                await using var dbContext = new ApplicationDbContext();
+                await dbContext.AddAsync(Users[chatId]);
+                await dbContext.SaveChangesAsync();
+            }
         }
     }
+    /// <summary>
+    /// Method to determine if a user is subscribed to a channel
+    /// </summary>
+    /// <param name="message">Message from user</param>
+    /// <returns>True if user subscribed</returns>
     public static async Task<bool> IsSubscriberAsync(Message message)
     {
         if (message.From != null)
@@ -132,6 +175,11 @@ public static class Handlers
 
         return false;
     }
+    /// <summary>
+    /// Method to determine if a user is subscribed to a channel
+    /// </summary>
+    /// <param name="user">User</param>
+    /// <returns>True if user subscribed</returns>
     public static async Task<bool> IsSubscriberAsync(User user)
     {
         var chatMember = await botClient.GetChatMemberAsync(chatId: "@testMyBotFuctions", 

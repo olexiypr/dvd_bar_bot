@@ -1,4 +1,6 @@
-﻿using System.Data.Entity.Infrastructure;
+﻿
+#define DEBUG
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using DvdBarBot.Entities;
 using DvdBarBot.Interfaces;
@@ -36,13 +38,22 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
             .AddUserSecrets<ApplicationDbContext>()
             .Build();
         var connectionStrings = config.GetConnectionString("DvdBarDb");
+#if RELEASE
         optionsBuilder.UseNpgsql(ConnectionStrings.connectionStringAzure)
             .EnableDetailedErrors()
             .EnableSensitiveDataLogging()
             .LogTo(
-                Console.WriteLine,
+                new StreamWriter("efCoreLogs.log", true).WriteLine,
                 new[] {DbLoggerCategory.Database.Command.Name},
                 LogLevel.Information);
+#elif DEBUG
+        optionsBuilder.UseNpgsql(ConnectionStrings.connectionStringAzure)
+            .EnableDetailedErrors()
+            .EnableSensitiveDataLogging()
+            .LogTo(Console.WriteLine,
+                new[] {DbLoggerCategory.Database.Command.Name},
+                LogLevel.Information);
+#endif
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -70,8 +81,6 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
         modelBuilder.Entity<User>()
             .HasOne(user => user.Raffle);
         
-        modelBuilder.Entity<User>()
-            .Ignore(user => user.Timer);
         
         modelBuilder.Entity<User>()
             .Ignore(user => user.State);

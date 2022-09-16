@@ -11,7 +11,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 using User = DvdBarBot.Entities.User;
 
 namespace DvdBarBot.Sender;
-
+/// <summary>
+/// A set of static methods for sending messages to the user
+/// </summary>
 public static class Sender
 {
     public static ITelegramBotClient botClient { get; set; }
@@ -23,27 +25,25 @@ public static class Sender
         set
         {
             _dbContext = value;
-            GetRaffle = value;
             AdminSender.GetAllProducts = value;
         }
     }
-
-    public static IGetRaffle GetRaffle { get; set; }
     private static ApplicationDbContext _dbContext;
 
     public static async Task SendPropositionSubscribeChannelAsync(User user)
     {
-        await botClient.SendTextMessageAsync(chatId: user.ChatId,
-            text: "Для використання боту підпишіться на канал @testMyBotFuctions\n" +
-                  "Та натисніть /start",
-            cancellationToken: cancellationToken);
+        await SendTextMessageAsync(user, "Для використання боту підпишіться на канал @testMyBotFuctions\nТа натисніть /start");
     }
 
-    public static async Task SayHalloAsync(User user)
+    private static async Task SendTextMessageAsync(User user, string text)
     {
         await botClient.SendTextMessageAsync(chatId: user.ChatId,
-            text: $"Привіт, {user.Name}! Вибери що хочеш зробити",
+            text: text,
             cancellationToken: cancellationToken);
+    }
+    public static async Task SayHalloAsync(User user)
+    {
+        await SendTextMessageAsync(user, $"Привіт, {user.Name}! Вибери що хочеш зробити");
     }
 
     public static async Task SendMenuAsync(User user)
@@ -55,9 +55,7 @@ public static class Sender
     }
     public static async Task SendStubAsync(User user)
     {
-        await botClient.SendTextMessageAsync(chatId: user.ChatId,
-            text: $"{user.Name}, я не розумію твоєї команди",
-            cancellationToken: cancellationToken);
+        await SendTextMessageAsync(user, $"{user.Name}, я не розумію твоєї команди");
     }
 
     public static async Task<Message> SendPropositionToRaffleAsync(User user)
@@ -65,7 +63,11 @@ public static class Sender
         var raffle = Raffle.Instance;
         InlineKeyboardMarkup keyboardMarkup = new(new[]
         {
-            new[] {InlineKeyboardButton.WithCallbackData($"Беру участь. Кількість учасників {raffle.CurrentUserCount}/{raffle.MaxUsersCount}", "take_part_raffle"),}
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData($"Беру участь. Кількість учасників {raffle.CurrentUserCount}/{raffle.MaxUsersCount}", "take_part_raffle"),
+                InlineKeyboardButton.WithCallbackData("Не цікаво", "dont_take_part"), 
+            }
         });
         return await botClient.SendTextMessageAsync(chatId: user.ChatId,
             text: $"Привіт, {user.Name} тобі випала можливість прийняти участь в розіграші" +
@@ -73,8 +75,8 @@ public static class Sender
             cancellationToken: cancellationToken,
             replyMarkup: keyboardMarkup);
     }
-
-    public static async Task SendSubmitToTakePartInRaffle(User user, Message message)
+    
+    public static async Task SendSubmitToTakePartInRaffle(User user, Message? message)
     {
         InlineKeyboardMarkup keyboardMarkup = new(new[]
         {
@@ -86,11 +88,21 @@ public static class Sender
             replyMarkup: keyboardMarkup,
             text: message.Text);
     }
+    public static async Task SendSubmitToDontTakePartInRaffle(User user, Message? message)
+    {
+        InlineKeyboardMarkup keyboardMarkup = new(new[]
+        {
+            new[] {InlineKeyboardButton.WithCallbackData($"Якщо передумаєш натисни сюди", "take_part_raffle"),}
+        });
+        await botClient.EditMessageTextAsync(chatId: user.ChatId,
+            messageId: message.MessageId,
+            cancellationToken: cancellationToken,
+            replyMarkup: keyboardMarkup,
+            text: message.Text);
+    }
 
     public static async Task SendInfoForAlreadyParticipatingRaffleAsync(User user)
     {
-        await botClient.SendTextMessageAsync(chatId: user.ChatId,
-            cancellationToken: cancellationToken,
-            text: "Ви вже приймаєте участь в розіграші");
+        await SendTextMessageAsync(user, "Ви вже приймаєте участь в розіграші");
     }
 }
