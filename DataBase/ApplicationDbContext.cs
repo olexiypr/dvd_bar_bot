@@ -1,5 +1,5 @@
 ﻿
-#define RELEASE
+#define DEBUG
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using DvdBarBot.Entities;
@@ -69,7 +69,7 @@ public class ApplicationDbContext : DbContext, IGetAllProductsInCategory, IGetAl
         modelBuilder.Entity<Product>()
             .ToTable("products")
             .HasKey(product => product.Id);
-
+        
         modelBuilder.Entity<Product>()
             .HasOne(product => product.Category)
             .WithMany(category => category.Products);

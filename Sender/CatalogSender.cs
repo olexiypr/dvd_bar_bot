@@ -43,14 +43,18 @@ public static class CatalogSender
     public static async Task<List<Message>> SendAllProductsInCategoryAsync(User user, int categoryId)
     {
         var sentMessages = new List<Message>();
-        foreach (var product in await AllProductsInCategory.GetProductsInCategoryAsync(categoryId))
+        await using var context = new ApplicationDbContext();
+        var products = 
+            context.products
+                .Where(product => product.Category.Id == categoryId).ToList(); //треба правильно вичитати звязані сутності
+        foreach (var product in products)
         {
             InlineKeyboardMarkup keyboardMarkup = new(new[]
             {
                 InlineKeyboardButton.WithUrl("Зв'язатися з менеджером @olexiypr для покупки", "https://t.me/olexiypr"),
             });
             sentMessages.Add(await Sender.botClient.SendTextMessageAsync(chatId: user.ChatId,
-                text: product.GetMessageString(),
+                text: product.ToString(),
                 replyMarkup: keyboardMarkup,
                 cancellationToken: cancellationToken));
         }

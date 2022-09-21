@@ -41,7 +41,6 @@ public class AppProductState : AdminState
 
     private async Task HandleTextMessage(Message message)
     {
-        await using var dbContext = new ApplicationDbContext();
         var messageText = message.Text;
         var walidThreeLines = new Regex(@"\n\w+");
         if (walidThreeLines.Matches(messageText).Count != 2)
@@ -59,9 +58,9 @@ public class AppProductState : AdminState
     {
         await using var dbContext = new ApplicationDbContext();
         var categoryId = int.Parse(callbackQuery.Data.Split("_")[1]);
-        var categories = dbContext.ProductCategories;
+        var categories = dbContext.ProductCategories.ToList();
         Product.Category = categories.First(category => category.Id == categoryId);
-        dbContext.Add(Product);
+        await dbContext.AddAsync(Product);
         await dbContext.SaveChangesAsync();
         await AdminSender.ChangeMessageForSubmitAddProduct(FinalProductMessage);
     }

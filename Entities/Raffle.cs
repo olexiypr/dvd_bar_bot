@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Timers;
+using DvdBarBot.DataBase;
 using Telegram.Bot;
 using Timer = System.Timers.Timer;
 
 namespace DvdBarBot.Entities;
 
-public class Raffle
+public class Raffle //додати функціонал для повторного розіграшу
 {
     public static Raffle Instance { get; set; }
     private static object syncRoot = new Object();
@@ -57,9 +58,10 @@ public class Raffle
     {
         IsStarted = true;
         Start = DateTime.Now;
-        double countMiliCesInDay = 1000 * 3600 * 8;
+        double countMiliCesInDay = 1000 * 300;
         Timer = new Timer(countMiliCesInDay);
         Timer.Elapsed += GetWinner;
+        Timer.Enabled = true;
         End = DateTime.Now.AddDays(1);
     }
 
@@ -67,12 +69,28 @@ public class Raffle
     {
         Timer.Dispose();
         Timer.Stop();
-        Winner = Users[new Random().Next(MaxUsersCount)];
-        await Sender.Sender.botClient.SendTextMessageAsync(chatId: Winner.ChatId,
-            text: "U are winner!",
-            cancellationToken: Sender.Sender.cancellationToken);
+        /*Winner = Users[new Random().Next(MaxUsersCount)];*/
+        Winner = Users[0];
+        try
+        {
+            await using var dContext = new ApplicationDbContext();
+            var promo = dContext.promocodes.First();
+            await Sender.Sender.botClient.SendTextMessageAsync(chatId: Winner.ChatId,
+                text: $"U are winner! Promo: {promo.Code}",
+                cancellationToken: Sender.Sender.cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            throw;
+        }
+        finally
+        {
+            await Sender.Sender.botClient.SendTextMessageAsync(chatId: Winner.ChatId,
+                text: $"U are winner!",
+                cancellationToken: Sender.Sender.cancellationToken);
+        }
     }
-
     public void AddUser(User user)
     {
         Users.Add(user);

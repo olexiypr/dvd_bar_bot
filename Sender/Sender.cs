@@ -30,12 +30,12 @@ public static class Sender
     }
     private static ApplicationDbContext _dbContext;
 
-    public static async Task SendPropositionSubscribeChannelAsync(User user)
+    public static async Task SendPropositionSubscribeChannelAsync(IChatId user)
     {
         await SendTextMessageAsync(user, "Для використання боту підпишіться на канал @testMyBotFuctions\nТа натисніть /start");
     }
 
-    private static async Task SendTextMessageAsync(User user, string text)
+    private static async Task SendTextMessageAsync(IChatId user, string text)
     {
         await botClient.SendTextMessageAsync(chatId: user.ChatId,
             text: text,
@@ -46,7 +46,7 @@ public static class Sender
         await SendTextMessageAsync(user, $"Привіт, {user.Name}! Вибери що хочеш зробити");
     }
 
-    public static async Task SendMenuAsync(User user)
+    public static async Task SendMenuAsync(IChatId user)
     {
         await botClient.SendTextMessageAsync(chatId: user.ChatId,
             text: "Меню",
@@ -76,7 +76,7 @@ public static class Sender
             replyMarkup: keyboardMarkup);
     }
     
-    public static async Task SendSubmitToTakePartInRaffle(User user, Message? message)
+    public static async Task SendSubmitToTakePartInRaffle(IChatId user, Message? message)
     {
         InlineKeyboardMarkup keyboardMarkup = new(new[]
         {
@@ -88,7 +88,7 @@ public static class Sender
             replyMarkup: keyboardMarkup,
             text: message.Text);
     }
-    public static async Task SendSubmitToDontTakePartInRaffle(User user, Message? message)
+    public static async Task SendSubmitToDontTakePartInRaffle(IChatId user, Message? message)
     {
         InlineKeyboardMarkup keyboardMarkup = new(new[]
         {

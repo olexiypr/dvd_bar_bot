@@ -61,7 +61,7 @@ public static class Handlers
             return;
         }
         var chatId = update.Message == null ? update.CallbackQuery.Message.Chat.Id : update.Message.Chat.Id;
-        if (chatId == DvdBarBot.Admin.Admin.ChatId)
+        if (chatId == DvdBarBot.Admin.Admin.StaticChatId)
         {
             HandleAdminUpdateAsync(update);
             return;
@@ -99,7 +99,7 @@ public static class Handlers
     {
         if (Admin == null)
         {
-            Admin = new Admin.Admin(update.Message.From);
+            Admin = DvdBarBot.Admin.Admin.CreateInstance(update.Message.From);
         }
             
         switch (update.Type)

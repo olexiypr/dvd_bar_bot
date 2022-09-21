@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using System.Timers;
+using DvdBarBot.Interfaces;
 using DvdBarBot.States;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -11,7 +12,7 @@ using Timer = System.Timers.Timer;
 
 namespace DvdBarBot.Entities;
 
-public class User
+public class User : IChatId
 {
     public int Id { get; set; }
     private static int _counter = 1;

@@ -12,14 +12,17 @@ namespace DvdBarBot.Admin;
 
 public static class AdminSender
 {
-    private static Admin Admin { get; set; }
+    private static IChatId _admin;
+
+    private static IChatId Admin => DvdBarBot.Admin.Admin.Instance;
+
     public static ITelegramBotClient botClient { get; set; }
     public static CancellationToken cancellationToken { get; set; }
     public static IGetAllProducts GetAllProducts { get; set; }
     public static async Task SendMenuAsync()
     {
         await botClient.SendTextMessageAsync(chatId: Admin.ChatId,
-            text: "",
+            text: "Меню",
             replyMarkup: AdminMenu.GetMenu,
             cancellationToken: cancellationToken);
     }
@@ -30,7 +33,7 @@ public static class AdminSender
         var allProducts = GetAllProducts.GetAllProductsAsync().Result;
         if (!allProducts.Any())
         {
-             sentMessages.Add(await botClient.SendTextMessageAsync(chatId: Admin.ChatId,
+            sentMessages.Add(await botClient.SendTextMessageAsync(chatId: Admin.ChatId,
                 text: "Всі товари видалені!",
                 cancellationToken: cancellationToken));
              return sentMessages;
@@ -45,7 +48,7 @@ public static class AdminSender
                 }
             });
             sentMessages.Add(await botClient.SendTextMessageAsync(chatId: Admin.ChatId,
-                text: product.GetMessageString(),
+                text: product.ToString(),
                 cancellationToken: cancellationToken,
                 replyMarkup: keyboardMarkup));
         }
@@ -128,7 +131,7 @@ public static class AdminSender
                 .Select(category =>
                     InlineKeyboardButton.WithCallbackData($"{category.Name}", $"category_{category.Id}")).ToArray()
         });
-        var text = $"Виберіть категорію для товару\nЗараз він виглядає так:\n--------------------\n" + product.GetMessageString();
+        var text = $"Виберіть категорію для товару\nЗараз він виглядає так:\n--------------------\n" + product.ToString();
         return await botClient.SendTextMessageAsync(chatId: Admin.ChatId,
             text: text,
             cancellationToken: cancellationToken,
